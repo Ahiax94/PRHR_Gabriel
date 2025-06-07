@@ -99,14 +99,27 @@ WITH first_payments AS (
     FROM payment
     GROUP BY user_id
 ),
-joined_with_users AS (
+confirmed_products AS (
+    SELECT 
+        p.user_id,
+        COUNT(*) AS confirmed_in_7_days
+    FROM products p
+    JOIN user u ON u.id = p.user_id
+    WHERE 
+        p.status = 'CONFIRMED'
+        AND p.created_at BETWEEN u.date_joined AND datetime(u.date_joined, '+7 days')
+    GROUP BY p.user_id
+),
+joined_all AS (
     SELECT 
         u.id AS user_id,
         u.country_code,
         u.date_joined,
-        fp.first_payment_date
+        fp.first_payment_date,
+        COALESCE(cp.confirmed_in_7_days, 0) AS confirmed_in_7_days
     FROM user u
     LEFT JOIN first_payments fp ON u.id = fp.user_id
+    LEFT JOIN confirmed_products cp ON u.id = cp.user_id
 )
 SELECT 
     country_code,
@@ -114,15 +127,16 @@ SELECT
         COUNT(
             CASE 
                 WHEN first_payment_date IS NOT NULL 
-                     AND first_payment_date <= datetime(date_joined, '+3 days') 
+                     AND first_payment_date <= datetime(date_joined, '+3 days')
+                     AND confirmed_in_7_days >= 2 
                 THEN 1 
             END
-        ) * 100.0 / COUNT(*),
+        ) * 100 / COUNT(*),
         2
-    ) || ' %' AS percentage_in_3_days
-FROM joined_with_users
+    ) || ' %' AS percentage
+FROM joined_all
 GROUP BY country_code
-ORDER BY percentage_in_3_days DESC;
+ORDER BY percentage DESC;
 ```
 ### 4. % of weekly new users that never have done a payment.
 ```
