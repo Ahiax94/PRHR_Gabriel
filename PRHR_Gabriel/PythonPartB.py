@@ -1,13 +1,13 @@
 import re
 
-# === Official control letters ===
+# Control letters
 LETRAS_CONTROL = "TRWAGMYFPDXBNJZSQVHLCKE"
 
-# === Calculate the control letter for a number (DNI or NIE) ===
+# Calculate the control letter for a number (DNI or NIE) 
 def calcular_letra(numero: int) -> str:
     return LETRAS_CONTROL[numero % 23]
 
-# === Validate if a DNI (format: 8 digits + 1 letter) is valid ===
+# Validate if a DNI (format: 8 digits + 1 letter) is valid
 def es_dni_valido(dni: str) -> bool:
     if not re.fullmatch(r"\d{8}[A-Za-z]", dni):
         return False
@@ -16,7 +16,7 @@ def es_dni_valido(dni: str) -> bool:
     letra_correcta = calcular_letra(numero)
     return dni[-1] == letra_correcta
 
-# === Validate if a NIE (X/Y/Z + 7 digits + 1 letter) is valid ===
+# Validate if a NIE (X/Y/Z + 7 digits + 1 letter) is valid
 def es_nie_valido(nie: str) -> bool:
     if not re.fullmatch(r"[XYZxyz]\d{7}[A-Za-z]", nie):
         return False
@@ -28,7 +28,7 @@ def es_nie_valido(nie: str) -> bool:
     letra_correcta = calcular_letra(numero)
     return nie[-1] == letra_correcta
 
-# === Main function to anonymize ===
+# Main function to anonymize
 def anonimizar_documentos(texto: str) -> str:
     # Search for possible documents of type DNI or NIE
     candidatos = re.findall(r"\b(?:\d{8}[A-Za-z]|[XYZxyz]\d{7}[A-Za-z])\b", texto)
@@ -37,7 +37,7 @@ def anonimizar_documentos(texto: str) -> str:
             texto = texto.replace(doc, "xxxxxxxxx")
     return texto
 
-# === Test examples ===
+# est examples
 def ejecutar_ejemplos():
     ejemplos = [
         "✅ Valid DNI: 12345678Z",
