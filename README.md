@@ -4,41 +4,42 @@ A cube is painted orange on all six sides. It is divided into 125 (=5 x 5 x 5) e
 ### 1. The number of smaller cubes having:
 
 #### a) 3 faces coloured?
-8 cubos, los que están en las esquinas.
+8 cubes, the ones located at the corners.
 
 #### b) exactly 2 faces coloured?
-Estos son los cubos que están en los bordes menos los que ocupan las esquinas y, por tanto, tienen un lado más a la vista.
-Un cubo tiene 12 bordes; menos las esquinas, nos deja con 3 cubos por borde, así que serían 12 x 3 = 36 cubos.
+These are the cubes that are on the edges, excluding the ones on the corners, and therefore have one more face exposed.
+A cube has 12 edges; excluding the corners leaves us with 3 cubes per edge, so that would be 12 x 3 = 36 cubes.
 
 #### c) exactly 1 face coloured?
-Estos serían los cubos que no están en los bordes, por tanto serían 3 x 3 = 9 cubos por lado. Un cubo tiene 6 lados, así que el resultado final sería 54 (= 6 x 9).
+These would be the cubes that are not on the edges, so there would be 3 x 3 = 9 cubes per face. A cube has 6 faces, so the final result would be 54 (= 6 x 9).
 
 #### d) 0 faces coloured?
-Serían todos los que no tienen una cara a la vista, por tanto podemos imaginar un cubo con unas medidas inferiores si eliminamos una capa de cubos por lado, lo que nos deja un cubo de 3 x 3 x 3, dando el resultado de 27 cubos sin ninguna cara.
+These are the ones that have no face exposed. Therefore, we can imagine a smaller cube if we remove one layer of cubes per side, leaving a 3 x 3 x 3 cube, resulting in 27 cubes with no faces painted.
 
 ### 2. All 125 cubes are put into a bag. If a single cube is selected at random from the bag, find probability of picking a cube having 1 or more orange faces
-Hay 125 cubos, 27 de ellos sin una cara naranja.
-Así que podemos deducir que la posibilidad de sacar uno con una cara naranja o más es de (125 - 27 =) 98/125 = 0,784. Luego sacamos el % multiplicando por 100 y nos da 78,4 %.
+There are 125 cubes, 27 of which have no orange face.
+So we can deduce that the probability of picking one with one or more orange faces is (125 - 27 =) 98/125 = 0.784.
+Then, multiplying by 100 gives us 78.4%.
 
 ### 3. What is the average number of orange faces on a small cube? In the above situation N = 5 (with N³ = 125)
-Para sacar el resultado, primero sumamos todas las caras que sabemos que están pintadas:
-8 cubitos × 3 caras = 24
-36 cubitos × 2 caras = 72
-54 cubitos × 1 cara = 54
-27 cubitos × 0 caras = 0
-Las sumamos todas:
+To find the result, we first add up all the faces we know are painted:
+8 cubes × 3 faces = 24
+36 cubes × 2 faces = 72
+54 cubes × 1 face = 54
+27 cubes × 0 faces = 0
+Adding them all:
 24 + 72 + 54 + 0 = 150
 
-Y sacamos el promedio: 150 / 125 = 1,2 de promedio de cara naranja por cubito.
+Then we calculate the average: 150 / 125 = 1.2 average orange faces per small cube.
 
 
 #### 4. For general N, give a formula for (1.b) the number with exactly 2 faces coloured
-
-Como ya he dicho, hay 12 aristas en un cubo y cada una tiene N (o longitud en cubitos de la arista) – 2 (uno por lado). Así que concluimos que la fórmula sería 12 × (N - 2).
+As previously stated, a cube has 12 edges, and each edge has N (or N-length in cubes) – 2 (one less at each end).
+So we conclude that the formula is: 12 × (N - 2).
 
 #### 5. For what values of N is this formula correct?
-Para que se valga, tenemos que tener mínimo un cubito entre las esquinas, o lo que es lo mismo:
-N - 2 ≥ 1. Si la simplificamos, podemos dejarla como N ≥ 3.
+For it to be valid, we must have at least one cube between the corners, which means:
+N - 2 ≥ 1, simplified as: N ≥ 3.
 
 
 
@@ -200,9 +201,9 @@ ORDER BY current_payment;
 ```
 # Part 3
 1. 
-PythonPartA.py y PythonPartB.py de este repositorio
+PythonPartA.py and PythonPartB.py from this repository.
 
 2.
-Depende de cual fuera el proposito de almacenar dicha informacion.
-Si solo fuera para guardar un historial que poder revisar de vez en cuando, usaría CSV o JSON.
-Por el contrario si quisiera trabajar los datos para hacer modelos predictivos o estadisticos utilizaría parquet.
+It depends on the purpose of storing such information.
+If it’s only to save a history that can be reviewed from time to time, I would use CSV or JSON.
+On the other hand, if I wanted to process the data to create predictive or statistical models, I would use Parquet.
