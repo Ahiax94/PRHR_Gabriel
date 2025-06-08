@@ -46,8 +46,11 @@ N - 2 ≥ 1, simplified as: N ≥ 3.
 
 # Part 2
 Write SQL query that returns: 
+#### Why use CTEs and other functions:
+Although I could have achieved the same result without using CTEs or functions like LAG() and COALESCE(), I chose to use them to demonstrate that—even if I am not yet fully accustomed to using them—since the project performs transformations using SQL, these tools are necessary or can greatly improve the SQL code’s readability and ease of debugging.
 
 ### 1. Number of registered users by country
+It returns the total number of registered users per country, sorted from the highest to the lowest number of users.
 ```
 SELECT 
     country_code, 
@@ -56,8 +59,22 @@ FROM user
 GROUP BY country_code
 ORDER BY total_users DESC;
 ```
+#### Explanation:
+
+SELECT country_code, COUNT(*) AS total_users
+Selects the country code and counts the number of users per country.
+
+FROM user
+ Reads from the user table.
+
+GROUP BY country_code
+Groups records by country, so the count is per country.
+
+ORDER BY total_users DESC
+Orders results from countries with the most users to the least.
 
 ### 2. % of users, who made their first payment in 3 days after registration by country.
+It calculates the percentage of users per country who made their first payment within 3 days after registration. The result is shown as a percentage with two decimal places, ordered from highest to lowest.
 ```
 WITH first_payments AS (
     SELECT 
@@ -91,7 +108,33 @@ FROM joined_with_users
 GROUP BY country_code
 ORDER BY percentage_in_3_days DESC;
 ```
+#### Explanation:
+
+CTE first_payments:
+Finds each user's earliest payment date (MIN(created_at)), grouped by user.
+
+CTE joined_with_users:
+Joins the users with their first payment dates (if any), including users with no payments (using LEFT JOIN).
+
+Main SELECT:
+
+- Groups by country.
+
+- Uses COUNT(CASE WHEN ...) to count users whose first payment was within 3 days after joining.
+
+- Divides by total users per country to get the percentage.
+
+- Uses ROUND(..., 2) to round to two decimals and concatenates ' %' to format as a percentage string.
+
+- Orders by the highest percentage first.
+
+Why CTE?
+CTEs simplify complex queries by breaking them into readable parts — first getting payments, then joining users, then computing the percentage.
+
+
 ### 3. % of users, who made their first payment in 3 days after registration and had 2 confirmed products in 7 days after registration by country.
+This SQL query calculates the percentage of users per country who:
+Made their first payment within 3 days after registering, and had at least 2 confirmed products within 7 days of registration.
 ```
 WITH first_payments AS (
     SELECT 
@@ -139,6 +182,30 @@ FROM joined_all
 GROUP BY country_code
 ORDER BY percentage DESC;
 ```
+#### Explanation:
+
+CTE first_payments:
+Finds each user's earliest payment date.
+
+CTE confirmed_products:
+Counts the number of confirmed products per user that were created within 7 days after the user joined.
+
+CTE joined_all:
+Combines users with their first payment date and count of confirmed products (using COALESCE to treat missing values as zero).
+
+Main SELECT:
+
+Calculates the percentage of users per country who had their first payment within 3 days AND at least 2 confirmed products within 7 days.
+
+Uses conditional counting inside COUNT(CASE WHEN ...).
+
+Formats the output as a percentage string rounded to two decimals.
+
+Orders by the highest percentage.
+
+Why CTE?
+It organizes the logic into manageable steps: payments, products, and combined data for clarity and maintainability.
+
 ### 4. % of weekly new users that never have done a payment.
 ```
 WITH users_with_week AS (
@@ -199,6 +266,24 @@ SELECT
 FROM product_ranges
 ORDER BY current_payment;
 ```
+#### Explanation:
+
+CTE user_payments:
+Lists all payments of user 1, along with the previous payment date (using the window function LAG).
+
+CTE confirmed_products:
+Filters confirmed products of user 1.
+
+CTE product_ranges:
+For each payment period (from previous payment to current payment), sums the hours of confirmed products that happened between these two payment dates.
+COALESCE(up.previous_payment, '1970-01-01') ensures we cover the time before the very first payment.
+
+Final SELECT:
+Outputs the payment ID, previous payment date, current payment date, and total confirmed product hours used between these payments.
+
+SQL resources used:
+Window functions (LAG), date filtering, aggregation (SUM), and COALESCE for handling nulls.
+
 # Part 3
 1. 
 PythonPartA.py and PythonPartB.py from this repository.
