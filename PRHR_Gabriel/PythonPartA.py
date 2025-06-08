@@ -1,6 +1,7 @@
 import requests
 from datetime import datetime
-
+# I wasn’t sure whether I should look at the hardcoded time or use the current time.
+# I opted for the latter, as I think it makes the script more useful you could run it multiple times before 8:50 AM to check if there are any bikes or available spaces.
 API_URL = "https://api.citybik.es/v2/networks/bicing"
 
 # 🚲 Stations
