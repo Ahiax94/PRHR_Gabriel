@@ -241,13 +241,18 @@ GROUP BY country_code
 ORDER BY percentage_in_3_days DESC;  -- Orders countries by highest percentage first
 ```
 # Part 3
-### 1. Write a script or use a library that would get the required information to confirm the 
-bike and slot availability. (you can base your conclusions on one day of data) 
+## Part 3-A
+### 1. Write a script or use a library that would get the required information to confirm the bike and slot availability. (you can base your conclusions on one day of data) 
 
-PythonPartA.py and PythonPartB.py from this repository.
+PRHR_Gabriel/PythonPartA.py from this repository.
 
 ### 2. In case you decide to download the bicing API information every 5 seconds. In which database would you recommend saving it? Please explain your choice.  
 
 It would depend on the purpose we want to give to the data. If the idea is just to store it for historical records or personal use, I would prioritize using an SQL database. I would create an ETL process that appends the data once a day to build a historical record. I would delete the data generated locally once a week, during Saturday or Sunday when no data insertions would take place.
 
 On the other hand, if the goal were to perform more in-depth analysis and not just on personal data but also to eventually expand the database by feeding it with data from all company colleagues, I would opt to set up a cloud-based architecture and use Parquet files or another format that allows me to work with large amounts of data (even if the files aren't very large at the beginning).
+
+## Part 3-B
+### 1. Create a generic function to anonymize valid identity documents (natural persons) of the Spanish state in any type of text string input. Includes different examples where the result is validated. 
+
+PRHR_Gabriel/PythonPartB.py from this repository.
