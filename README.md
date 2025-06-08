@@ -23,11 +23,17 @@ Then, multiplying by 100 gives us 78.4%.
 
 ### 3. What is the average number of orange faces on a small cube? In the above situation N = 5 (with N³ = 125)
 To find the result, we first add up all the faces we know are painted:
+
 8 cubes × 3 faces = 24
+
 36 cubes × 2 faces = 72
+
 54 cubes × 1 face = 54
+
 27 cubes × 0 faces = 0
+
 Adding them all:
+
 24 + 72 + 54 + 0 = 150
 
 Then we calculate the average: 150 / 125 = 1.2 average orange faces per small cube.
@@ -47,35 +53,27 @@ N - 2 ≥ 1, simplified as: N ≥ 3.
 # Part 2
 Write SQL query that returns: 
 #### Why use CTEs and other functions:
-Although I could have achieved the same result without using CTEs or functions like LAG() and COALESCE(), I chose to use them to demonstrate that—even if I am not yet fully accustomed to using them—since the project performs transformations using SQL, these tools are necessary or can greatly improve the SQL code’s readability and ease of debugging.
+Although I could have achieved the same result without using CTEs or functions like LAG() and COALESCE(), I chose to use them to demonstrate that, even if I am not yet fully accustomed to them, these tools are essential in a project that performs data transformations in SQL. They not only enhance the readability and ease of debugging but also promote reusability and modularity of the code, making it easier to maintain and extend in future use cases.
 
 ### 1. Number of registered users by country
-It returns the total number of registered users per country, sorted from the highest to the lowest number of users.
-```
+
+``` sql
+-- Selects the country code and counts the number of users per country.
 SELECT 
     country_code, 
     COUNT(*) AS total_users
+--  Reads from the user table.
 FROM user
+-- Groups records by country, so the count is per country.
 GROUP BY country_code
+-- Orders results from countries with the most users to the least.
 ORDER BY total_users DESC;
 ```
-#### Explanation:
-
-SELECT country_code, COUNT(*) AS total_users
-Selects the country code and counts the number of users per country.
-
-FROM user
- Reads from the user table.
-
-GROUP BY country_code
-Groups records by country, so the count is per country.
-
-ORDER BY total_users DESC
-Orders results from countries with the most users to the least.
 
 ### 2. % of users, who made their first payment in 3 days after registration by country.
-It calculates the percentage of users per country who made their first payment within 3 days after registration. The result is shown as a percentage with two decimal places, ordered from highest to lowest.
-```
+
+``` sql
+-- Finds each user's earliest payment date (MIN(created_at)), grouped by user.
 WITH first_payments AS (
     SELECT 
         user_id,
@@ -83,6 +81,7 @@ WITH first_payments AS (
     FROM payment
     GROUP BY user_id
 ),
+-- Joins the users with their first payment dates (if any), including users with no payments (using LEFT JOIN).
 joined_with_users AS (
     SELECT 
         u.id AS user_id,
@@ -94,48 +93,27 @@ joined_with_users AS (
 )
 SELECT 
     country_code,
+    -- Uses ROUND(..., 2) to round to two decimals and concatenates ' %' to format as a percentage string.
     ROUND(
+        -- Uses COUNT(CASE WHEN ...) to count users whose first payment was within 3 days after joining.
         COUNT(
             CASE 
                 WHEN first_payment_date IS NOT NULL 
                      AND first_payment_date <= datetime(date_joined, '+3 days') 
                 THEN 1 
             END
-        ) * 100.0 / COUNT(*),
+        ) * 100.0 / COUNT(*), -- Divides by total users per country to get the percentage.
         2
     ) || ' %' AS percentage_in_3_days
 FROM joined_with_users
-GROUP BY country_code
-ORDER BY percentage_in_3_days DESC;
+GROUP BY country_code -- Groups by country.
+ORDER BY percentage_in_3_days DESC; -- Orders by the highest percentage first.
 ```
-#### Explanation:
-
-CTE first_payments:
-Finds each user's earliest payment date (MIN(created_at)), grouped by user.
-
-CTE joined_with_users:
-Joins the users with their first payment dates (if any), including users with no payments (using LEFT JOIN).
-
-Main SELECT:
-
-- Groups by country.
-
-- Uses COUNT(CASE WHEN ...) to count users whose first payment was within 3 days after joining.
-
-- Divides by total users per country to get the percentage.
-
-- Uses ROUND(..., 2) to round to two decimals and concatenates ' %' to format as a percentage string.
-
-- Orders by the highest percentage first.
-
-Why CTE?
-CTEs simplify complex queries by breaking them into readable parts — first getting payments, then joining users, then computing the percentage.
-
 
 ### 3. % of users, who made their first payment in 3 days after registration and had 2 confirmed products in 7 days after registration by country.
-This SQL query calculates the percentage of users per country who:
-Made their first payment within 3 days after registering, and had at least 2 confirmed products within 7 days of registration.
-```
+
+``` sql
+-- Finds each user's earliest payment date.
 WITH first_payments AS (
     SELECT 
         user_id,
@@ -143,6 +121,8 @@ WITH first_payments AS (
     FROM payment
     GROUP BY user_id
 ),
+
+-- Counts the number of confirmed products per user that were created within 7 days after the user joined.
 confirmed_products AS (
     SELECT 
         p.user_id,
@@ -154,6 +134,8 @@ confirmed_products AS (
         AND p.created_at BETWEEN u.date_joined AND datetime(u.date_joined, '+7 days')
     GROUP BY p.user_id
 ),
+
+-- Combines users with their first payment date and count of confirmed products (using COALESCE to treat missing values as zero).
 joined_all AS (
     SELECT 
         u.id AS user_id,
@@ -165,6 +147,9 @@ joined_all AS (
     LEFT JOIN first_payments fp ON u.id = fp.user_id
     LEFT JOIN confirmed_products cp ON u.id = cp.user_id
 )
+
+-- Calculates the percentage of users per country who had their first payment within 3 days 
+-- AND at least 2 confirmed products within 7 days.
 SELECT 
     country_code,
     ROUND(
@@ -175,45 +160,25 @@ SELECT
                      AND confirmed_in_7_days >= 2 
                 THEN 1 
             END
-        ) * 100 / COUNT(*),
+        ) * 100 / COUNT(*),  -- Uses conditional counting inside COUNT(CASE WHEN ...)
         2
-    ) || ' %' AS percentage
+    ) || ' %' AS percentage  -- Formats the output as a percentage string rounded to two decimals.
 FROM joined_all
 GROUP BY country_code
-ORDER BY percentage DESC;
+ORDER BY percentage DESC;  -- Orders by the highest percentage.
 ```
-#### Explanation:
-
-CTE first_payments:
-Finds each user's earliest payment date.
-
-CTE confirmed_products:
-Counts the number of confirmed products per user that were created within 7 days after the user joined.
-
-CTE joined_all:
-Combines users with their first payment date and count of confirmed products (using COALESCE to treat missing values as zero).
-
-Main SELECT:
-
-Calculates the percentage of users per country who had their first payment within 3 days AND at least 2 confirmed products within 7 days.
-
-Uses conditional counting inside COUNT(CASE WHEN ...).
-
-Formats the output as a percentage string rounded to two decimals.
-
-Orders by the highest percentage.
-
-Why CTE?
-It organizes the logic into manageable steps: payments, products, and combined data for clarity and maintainability.
 
 ### 4. % of weekly new users that never have done a payment.
-```
+``` sql
+-- Extracts users and assigns them to the week they joined, formatted as "Year-Week".
 WITH users_with_week AS (
     SELECT 
         id AS user_id,
         STRFTIME('%Y-%W', date_joined) AS week
     FROM user
 ),
+
+-- Identifies users who have not made any payments by checking for NULLs after a LEFT JOIN.
 users_without_payments AS (
     SELECT 
         u.user_id,
@@ -222,68 +187,59 @@ users_without_payments AS (
     LEFT JOIN payment p ON u.user_id = p.user_id
     WHERE p.user_id IS NULL
 )
+
+-- Calculates the percentage of users per week who never made a payment.
 SELECT 
     uw.week,
-    ROUND(COUNT(up.user_id) * 100.0 / COUNT(uw.user_id), 2) || '%' AS percentage_never_paid
+    ROUND(
+        COUNT(up.user_id) * 100.0 / COUNT(uw.user_id),  -- Percentage = (# of users without payment / total users that week) * 100
+        2
+    ) || '%' AS percentage_never_paid  -- Formats the result as a percentage string with 2 decimal places
 FROM users_with_week uw
 LEFT JOIN users_without_payments up ON uw.user_id = up.user_id
 GROUP BY uw.week
-ORDER BY uw.week;
+ORDER BY uw.week;  -- Orders the results chronologically by week
 ```
+
 ### 5. Advanced level (Extra point): Write the SQL that returns how many hours of confirmed products a specific user (for example user_id=1) has taken between payments.
-```
-WITH user_payments AS (
+``` sql
+-- Finds each user's earliest payment date.
+WITH first_payments AS (
     SELECT 
-        id AS payment_id,
         user_id,
-        created_at,
-        LAG(created_at) OVER (PARTITION BY user_id ORDER BY created_at) AS previous_payment
+        MIN(created_at) AS first_payment_date
     FROM payment
-    WHERE user_id = 1
+    GROUP BY user_id
 ),
-confirmed_products AS (
-    SELECT * 
-    FROM products 
-    WHERE user_id = 1 AND status = 'CONFIRMED'
-),
-product_ranges AS (
+
+-- Joins users with their first payment and calculates if that payment was within 3 days after registration.
+joined_with_users AS (
     SELECT 
-        up.payment_id,
-        up.previous_payment,
-        up.created_at AS current_payment,
-        SUM(cp.hours) AS confirmed_hours
-    FROM user_payments up
-    JOIN confirmed_products cp 
-        ON cp.created_at > COALESCE(up.previous_payment, '1970-01-01')
-       AND cp.created_at <= up.created_at
-    GROUP BY up.payment_id, up.previous_payment, up.created_at
+        u.id AS user_id,
+        u.country_code,
+        u.date_joined,
+        fp.first_payment_date
+    FROM user u
+    LEFT JOIN first_payments fp ON u.id = fp.user_id
 )
+
+-- Calculates the percentage of users per country whose first payment occurred within 3 days of registration.
 SELECT 
-    payment_id,
-    previous_payment,
-    current_payment,
-    confirmed_hours
-FROM product_ranges
-ORDER BY current_payment;
+    country_code,
+    ROUND(
+        COUNT(
+            CASE 
+                WHEN first_payment_date IS NOT NULL 
+                     AND first_payment_date <= datetime(date_joined, '+3 days')  -- Checks if payment was within 3 days
+                THEN 1 
+            END
+        ) * 100.0 / COUNT(*),  -- Computes percentage = qualifying users / total users
+        2
+    ) || ' %' AS percentage_in_3_days  -- Formats result as a percentage string
+FROM joined_with_users
+GROUP BY country_code
+ORDER BY percentage_in_3_days DESC;  -- Orders countries by highest percentage first
 ```
-#### Explanation:
-
-CTE user_payments:
-Lists all payments of user 1, along with the previous payment date (using the window function LAG).
-
-CTE confirmed_products:
-Filters confirmed products of user 1.
-
-CTE product_ranges:
-For each payment period (from previous payment to current payment), sums the hours of confirmed products that happened between these two payment dates.
-COALESCE(up.previous_payment, '1970-01-01') ensures we cover the time before the very first payment.
-
-Final SELECT:
-Outputs the payment ID, previous payment date, current payment date, and total confirmed product hours used between these payments.
-
-SQL resources used:
-Window functions (LAG), date filtering, aggregation (SUM), and COALESCE for handling nulls.
-
 # Part 3
 1. 
 PythonPartA.py and PythonPartB.py from this repository.
