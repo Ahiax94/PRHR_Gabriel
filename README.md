@@ -51,10 +51,12 @@ N - 2 ≥ 1, simplified as: N ≥ 3.
 
 
 # Part 2
-Write SQL query that returns: 
+To create the tables in order to test the queries, I used an SQLite database hosted on a website (https://sqliteonline.com/).
+
 #### Why use CTEs and other functions:
 Although I could have achieved the same result without using CTEs or functions like LAG() and COALESCE(), I chose to use them to demonstrate that, even if I am not yet fully accustomed to them, these tools are essential in a project that performs data transformations in SQL. They not only enhance the readability and ease of debugging but also promote reusability and modularity of the code, making it easier to maintain and extend in future use cases.
 
+## Write SQL query that returns: 
 ### 1. Number of registered users by country
 
 ``` sql
